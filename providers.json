@@ -1,0 +1,31 @@
+{
+  "providers": {
+    "fpt": {
+      "base_url": "https://token-api.fpt.ai/v1",
+      "api_key_env": "FPT_API_KEY",
+      "params": {
+        "temperature": 1,
+        "max_tokens": 2048,
+        "top_p": 1,
+        "top_k": 40,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      }
+    },
+    "openrouter": {
+      "base_url": "https://openrouter.ai/api/v1",
+      "api_key_env": "OPENROUTER_API_KEY",
+      "params": {
+        "temperature": 1,
+        "max_tokens": 2048,
+        "reasoning": {"enabled": true}
+      }
+    }
+  },
+  "models": [
+    {"id": "gemma-3-27b-it", "provider": "fpt"},
+    {"id": "gemma-4-26B-A4B-it", "provider": "fpt"},
+    {"id": "google/gemma-4-26b-a4b-it:free", "provider": "openrouter", "label": "gemma-4-26b-a4b-it (OpenRouter, free)"},
+    {"id": "google/gemma-4-31b-it:free", "provider": "openrouter", "label": "gemma-4-31b-it:free (OpenRouter, free)"}
+  ]
+}

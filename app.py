@@ -12,11 +12,21 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("olpai")
 
-API_URL = "https://token-api.fpt.ai/v1/chat/completions"
-API_KEY = os.getenv("API_KEY")
-# MODEL in .env is a comma-separated list; the first one is the default
-MODELS = [m.strip() for m in (os.getenv("MODEL") or "").split(",") if m.strip()]
-MODEL = MODELS[0] if MODELS else None
+# Providers and models are declared in providers.json (any OpenAI-compatible
+# /chat/completions API). Adding a provider/model needs no code change; API keys
+# stay in .env, referenced by name via "api_key_env".
+CONFIG_PATH = os.getenv("PROVIDERS_FILE") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "providers.json")
+with open(CONFIG_PATH, encoding="utf-8") as f:
+    _config = json.load(f)
+
+PROVIDERS = _config["providers"]
+# model id -> {"id", "label", "provider"}; the first one is the default
+MODEL_MAP = {
+    m["id"]: {"id": m["id"], "label": m.get("label", m["id"]), "provider": m["provider"]}
+    for m in _config["models"]
+}
+MODELS = list(MODEL_MAP.values())
+MODEL = MODELS[0]["id"] if MODELS else None
 
 
 @app.route("/")
@@ -29,24 +39,22 @@ def chat():
     data = request.get_json()
     messages = data.get("messages", [])
     model = data.get("model")
-    if model not in MODELS:
+    if model not in MODEL_MAP:
         model = MODEL
+    provider = PROVIDERS[MODEL_MAP[model]["provider"]]
+    api_url = provider["base_url"].rstrip("/") + "/chat/completions"
 
     payload = {
+        **provider.get("params", {}),
         "model": model,
         "messages": messages,
-        "temperature": 1,
-        "max_tokens": 2048,
-        "top_p": 1,
-        "top_k": 40,
-        "presence_penalty": 0,
-        "frequency_penalty": 0,
         "stream": True,
     }
 
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {API_KEY}",
+        "Authorization": f"Bearer {os.getenv(provider['api_key_env'])}",
+        **provider.get("headers", {}),
     }
 
     def sse_error(msg):
@@ -57,7 +65,7 @@ def chat():
         first = None
         try:
             # (connect timeout, max silence between chunks)
-            with requests.post(API_URL, headers=headers, json=payload, stream=True, timeout=(10, 45)) as resp:
+            with requests.post(api_url, headers=headers, json=payload, stream=True, timeout=(10, 45)) as resp:
                 log.info("upstream status=%s headers_in=%.1fs", resp.status_code, time.time() - start)
                 if resp.status_code != 200:
                     body = resp.text[:300]

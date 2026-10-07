@@ -564,7 +564,7 @@
     <h1>OLPAI Chat <span>by HaUI</span></h1>
   </div>
   <select id="model-select" class="badge" title="Chọn model">
-    {% for m in models %}<option value="{{ m }}">{{ m }}</option>{% endfor %}
+    {% for m in models %}<option value="{{ m.id }}">{{ m.label }}</option>{% endfor %}
   </select>
   <button id="history-btn" onclick="toggleHistory()">📜 Lịch sử</button>
 </header>

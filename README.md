@@ -40,7 +40,7 @@
 - Xem lại và xóa từng phiên; phiên cũ chỉ ở chế độ xem, không gửi thêm tin nhắn
 
 ### 9. Chọn model
-- Dropdown chọn model trên giao diện; danh sách lấy từ biến `MODEL` trong `.env` (phân tách bằng dấu phẩy, model đầu tiên là mặc định)
+- Dropdown chọn model trên giao diện; danh sách lấy từ `providers.json` (model đầu tiên là mặc định). Thêm provider/model (FPT AI, OpenRouter, hoặc API tương thích OpenAI khác) chỉ cần sửa file này, không sửa code; API key khai báo trong `.env` qua `api_key_env`
 - Lựa chọn được ghi nhớ trong trình duyệt; backend chỉ chấp nhận model nằm trong danh sách
 
 ### 10. Giới hạn token mỗi phiên
@@ -82,7 +82,7 @@
 pip install -r requirements.txt
 
 # 2. Cấu hình API Key trong .env
-printf 'API_KEY="your-api-key"\nMODEL="DeepSeek-V4-Flash"\n' > .env
+printf 'FPT_API_KEY="your-fpt-key"\nOPENROUTER_API_KEY="your-openrouter-key"\n' > .env
 
 # 3. Chạy ứng dụng
 python app.py
@@ -117,7 +117,7 @@ olpai-chatbot/
 ├── Dockerfile
 ├── docker-compose.yml
 ├── .dockerignore
-├── .env                    # API_KEY, MODEL (không commit)
+├── .env                    # FPT_API_KEY, OPENROUTER_API_KEY (không commit)
 └── README.md
 ```
 
